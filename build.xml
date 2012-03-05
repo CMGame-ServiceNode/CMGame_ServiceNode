@@ -1,0 +1,68 @@
+<project name="WeatherService" basedir="." default="main">
+
+  <property name="src.dir" value="src"/>
+  <property name="src.tests" value="tests"/>
+
+  <property name="build.dir" value="build"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property name="classes.tests" value="${build.dir}/test-classes"/>
+  <property name="reports.dir" value="reports"/>
+  <property name="reports.tests" value="${reports.dir}/tests"/>
+
+  <path id="app.classpath">
+    <pathelement location="${classes.dir}"/>
+  </path>
+
+  <path id="tests.classpath">
+    <path refid="app.classpath"/>
+    <pathelement location="${classes.tests}"/>
+    <fileset dir="lib">
+      <include name="junit*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="clean" description="Deletes build artifacts.">
+    <delete dir="${build.dir}"/>
+    <delete dir="${jar.dir}"/>
+    <delete dir="${reports.dir}"/>
+  </target>
+
+  <target name="compile" description="Compiles the application.">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="app.classpath"/>
+  </target>
+
+  <target name="compile.tests" description="Compiles the tests.">
+    <mkdir dir="${classes.tests}"/>
+    <javac srcdir="${src.tests}" destdir="${classes.tests}" classpathref="tests.classpath"/>
+  </target>
+
+  <target name="jar" depends="compile" description="Packages the application into a jar.">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="test" depends="compile,compile.tests" description="Compiles application and tests, then runs tests.">
+    <mkdir dir="${reports.tests}"/>
+    <junit printsummary="yes" haltonfailure="yes">
+      <classpath refid="tests.classpath"/>
+
+      <formatter type="plain"/>
+
+      <batchtest fork="yes" todir="${reports.tests}">
+        <fileset dir="${src.tests}">
+          <include name="**/*Test.java"/>
+          <!--<exclude name="**/AllTests.java"/>-->
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="main" depends="clean,test,jar" description="Cleans, compiles, tests, and jars the application."/>
+
+</project>
